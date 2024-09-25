@@ -1,0 +1,406 @@
+package Sound;
+
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.border.*;
+
+
+//make reasons shuffle with the questions and answers to display the correct reason on the screen.
+
+public class BoxOfRocks extends JPanel implements ActionListener
+{
+	JLabel[] invinGrid; //grid for cpu (Invincible)
+	JLabel[] omniGrid;  //grid for player (Omni-Man)
+
+	Panel p_card;
+	Panel card1, card2, card3;
+	CardLayout cdLayout = new CardLayout ();
+
+	Color backgroundColour = new Color (0, 0, 0);
+	Color buttonColour = Color.black;
+	Color buttonColour2 = new Color (245, 230, 0);
+	Color buttonText = new Color (0, 0, 0);
+	Color titleColour = new Color (245, 230, 0);
+	Font titleFont = new Font ("Times New Roman", Font.BOLD, 15);
+
+	JButton reveal, invinRoll, adv, choice;
+	JTextArea question;
+	JLabel ans, winCount;
+	JLabel blank, rocks1, rocks2, rocks3;
+	JLabel adv1, adv2, adv3;		
+
+	int count = 0;
+
+	int playerScore = 0;	//keeping track of player points
+	int cpuScore = 0; //keeping track of invincible's points
+	int playerScorewins = 0;
+	int cpuScorewins = 0;
+
+	//declare object and stack
+	Questions current = new Questions ();
+	Stack questionsStack = new Stack ();
+
+	public BoxOfRocks ()
+	{
+		p_card = new Panel ();		//setting up screens
+		p_card.setLayout (cdLayout);
+
+		//screens
+		opening ();
+		instructions ();
+		gamescreen ();
+
+		//MUSIC FROM MUSIC CLASS
+		String filepath = "themeMusic.wav"; 
+		Sound soundObject = new Sound (); //referencing the class
+		soundObject.playMusic(filepath); //referencing the method. passing the file path 
+
+
+		setLayout (new BorderLayout ());
+		add ("Center", p_card);
+		questionsStack.shuffle();
+	}
+
+	public void opening ()
+	{
+		card1 = new Panel ();	//create opening screen
+
+		JButton next = new JButton (createImageIcon ("openingscreen.png")); //button across the entire screen to click anywhere to move forward in the game
+		buttons (next, "next", 750 ,430, buttonColour, null);
+		card1.add (next);
+
+		p_card.add ("1", card1);
+	}
+
+	public void instructions () //game manual screen
+	{
+		card2 = new Panel ();
+		card2.setBackground (new Color (0, 173, 229));
+
+		JLabel title = new JLabel (createImageIcon ("insTitle.png")); //screen title
+		title.setPreferredSize(new Dimension (750, 70));
+
+		Panel playp = new Panel (); 
+		JButton play = new JButton (createImageIcon ("insb1.png"));	//play button
+		buttons (play, "play", 750, 70, buttonColour, null);
+		playp.add (play); 
+
+		Panel ins = new Panel ();
+		JButton how = new JButton (createImageIcon ("insb2.png"));	//instructions screen
+		buttons (how, "how", 750, 70, buttonColour, null);
+		ins.add (how);
+
+		Panel p3 = new Panel ();
+		JButton back = new JButton (createImageIcon ("insb3.png"));	// to go back
+		buttons (back, "back", 750, 70, buttonColour, null);
+		p3.add (back);
+
+		Panel p4 = new Panel ();
+		JButton creator = new JButton (createImageIcon ("insb4.png")); // to see creator
+		buttons (creator, "creator", 750, 70, buttonColour, null);
+		p4.add (creator);
+
+		card2.add (title);
+		card2.add (playp);
+		card2.add (ins);
+		card2.add (p3);
+		card2.add (p4);
+
+		p_card.add ("2", card2);
+	}
+
+	public void gamescreen ()
+	{
+		card3 = new Panel ();
+		card3.setBackground (new Color (0, 173, 229));
+
+
+		Panel playerScore = new Panel();
+		question = new JTextArea (1, 50);
+		question.setFont (new Font ("Arial", Font.BOLD, 14));
+		question.setForeground (titleColour);
+		question.setBackground (new Color (0, 173, 229));
+		question.setLineWrap (true);
+		question.setEditable (false);
+		question.append ("                                                      "
+				+ "Click 'Advance' to get your first question!");
+		playerScore.add (question);
+
+		Panel cpuScore = new Panel ();
+		choice = new JButton ("Click Here for the Possible Answers!");
+		buttons (choice, "choice", 350, 40, buttonColour2, null);
+		invinRoll = new JButton ("Click here to reveal Invincible's answer!");
+		buttons (invinRoll, "invinRoll", 350, 40, buttonColour2, null);
+		cpuScore.add(choice);
+		cpuScore.add(invinRoll);
+
+		Panel p3 = new Panel ();	//answer label
+		ans = new JLabel ("                                                   "
+				+ "ANSWER WILL BE DISPLAYED HERE");	
+		labels (ans, 700, 30, titleColour, titleFont);
+		p3.add(ans);
+
+		Panel p4 = new Panel ();
+		blank = new JLabel (createImageIcon ("starting.png"));	//picture that says where each player starts
+		blank.setPreferredSize(new Dimension (100, 160));
+		p4.add(blank);
+
+		invinGrid = new JLabel[3];  //grid for CPU (Invincible)
+		omniGrid = new JLabel[3];  //grid for Player (Omni-Man)
+		JPanel gridForInvin = new JPanel(new GridLayout(1, 3)); //grid for CPU
+		JPanel gridForOmni = new JPanel(new GridLayout(1, 3)); //grid for Player
+
+		for (int i = 0; i < 3; i++) {
+			invinGrid[i] = new JLabel(createImageIcon("blankGrid.png"));
+			omniGrid[i] = new JLabel(createImageIcon("blankGrid.png"));
+			gridForInvin.add(invinGrid[i]);
+			gridForOmni.add(omniGrid[i]);
+		}
+
+		Panel pButtons = new Panel (new GridLayout (1, 3));	//panel for all bottom buttons
+		adv = new JButton ("Advance!");
+		buttons (adv, "adv", 105, 42, buttonColour2, null);
+		reveal = new JButton ("Reveal");
+		buttons (reveal, "reveal", 100, 42, buttonColour2, null);
+		JButton ins = new JButton ("Instructions");
+		buttons (ins, "ins", 105, 42, buttonColour2, null);
+		JButton reset = new JButton ("Reset");
+		buttons (reset, "reset", 105, 42, buttonColour2, null);
+		JButton back = new JButton ("Back");
+		buttons (back, "gback", 105, 42, buttonColour2, null);
+		JButton exit = new JButton ("Exit");
+		buttons (exit, "exit", 105, 42, buttonColour2, null);
+
+		Panel wins = new Panel (new GridLayout (1, 2));
+		winCount = new JLabel ("                                                  "
+				+ "You have 0 win(s) and Invincible has (0) wins.");
+		labels (winCount, 700, 20, titleColour, titleFont);
+		wins.add(winCount);
+
+		pButtons.add(adv);
+		pButtons.add(reveal);
+		pButtons.add(ins);
+		pButtons.add(reset);
+		pButtons.add(back);
+		pButtons.add(exit);
+
+		card3.add(playerScore);
+		card3.add(cpuScore);
+		card3.add(p3);
+		card3.add(p4);
+		Panel group = new Panel(new GridLayout (2,1));
+		group.add(gridForInvin);
+		group.add(gridForOmni);
+		card3.add(group);
+		card3.add(pButtons);
+		card3.add(wins);
+
+		p_card.add ("3", card3);
+	}
+
+	public void buttons (JButton b, String actionCommand, int x, int y, Color c, String setBorder) //buttons method to shorten code. gets rid of constant repeated code.
+	{
+		b.addActionListener (this);
+		b.setActionCommand (actionCommand);
+		b.setPreferredSize (new Dimension (x, y));
+		b.setBackground (c);
+		b.setForeground (buttonText);
+		//	b.setBorder(null);
+	}
+
+	public void labels (JLabel a, int x, int y, Color h, Font f) //labels method to shorten code. gets rid of repeated code.
+	{									    
+		a.setPreferredSize (new Dimension (x, y));
+		a.setForeground (h);
+		a.setFont (f);
+	}
+
+	public void resetGrids() {
+		//reset the invinGrid
+		for (int i = 0; i < invinGrid.length; i++) {
+			invinGrid[i].setIcon(createImageIcon ("blankGrid.png"));
+		}
+
+		//reset the omniGrid
+		for (int i = 0; i < omniGrid.length; i++) {
+			omniGrid[i].setIcon(createImageIcon ("blankGrid.png"));
+		}
+	}
+
+	public void winCount () //simple win count, if a player gets 3 points then thats a win
+	{
+		if (playerScore >= 3) {
+			playerScorewins++;
+			playerScore=0;
+			cpuScore=0;
+			winCount.setText("                                        "
+					+ "You have" + playerScorewins + " win(s) and Invincible has" + cpuScorewins + "win(s).");
+		}
+		if (cpuScore >= 3) {
+			cpuScorewins++;
+			cpuScore=0;
+			playerScore=0;
+			winCount.setText("                                        "
+					+ "You have" + playerScorewins + " win(s) and Invincible has" + cpuScorewins + "win(s).");
+		}
+	}
+
+	public void resetGUI() //resets the labels and buttons to default
+	{
+		ans.setText ("                                                   "
+				+ "ANSWER WILL BE DISPLAYED HERE");
+		question.setText("                                            "
+				+ "Click 'Advance' to get a question!");
+		winCount.setText ("                                                  "
+				+ "You have 0 win(s) and Invincible has (0) wins.");
+		reveal.setEnabled(true);
+		adv.setEnabled (true);
+		choice.setEnabled(true);
+		questionsStack.shuffle ();
+	}
+
+	public void reset() //total reset
+	{ 
+		questionsStack.shuffle ();	//reset the arrays
+		resetGUI();    	//reset the GUI
+		resetGrids ();	//resets grids
+	}
+
+	public void win ()
+	{
+		if (playerScore == 3) {
+			JOptionPane.showMessageDialog (null, createImageIcon ("omniWin.png"), "OMNI-MAN WINS", JOptionPane.INFORMATION_MESSAGE);
+			winCount.setText("        You have " + playerScorewins + " win(s) and Invincible has " + cpuScorewins + " win(s).");
+		}	
+		else if (cpuScore == 3) {
+			JOptionPane.showMessageDialog (null, createImageIcon ("invinWin.png"), "INVINCIBLE WINS", JOptionPane.INFORMATION_MESSAGE);
+			winCount.setText("        You have " + playerScorewins + " win(s) and Invincible has " + cpuScorewins + " win(s).");
+		}
+	}
+
+	public void choice ()
+	{
+		//Show a dialog asking the user to select from
+		Integer [] possibleValues = {0, 1, 2};
+		Integer selectedValue = (Integer) JOptionPane.showInputDialog (null,
+				"Choose one", "Input", JOptionPane.INFORMATION_MESSAGE, null,
+				possibleValues, possibleValues [0]);
+
+		if (selectedValue != null && selectedValue.equals(current.getAnswer())) //accesses current answer and checks if selectedValue equals the answer
+		{
+			//	System.out.println("Correct Answer!");
+			playerScore++;
+			//	System.out.println(playerScore);
+			omniGrid[playerScore-1].setIcon(createImageIcon("omniPoint.png"));
+			winCount.setText("                                     "
+					+ "            You have " + playerScorewins + " win(s) and Invincible has " + cpuScorewins + " win(s).");
+			JOptionPane.showMessageDialog (null, createImageIcon ("omniRight.png"), "CORRECT", JOptionPane.INFORMATION_MESSAGE);
+
+		} 
+		else {		//if it doesn't match, then its wrong:
+			JOptionPane.showMessageDialog (null, createImageIcon ("omniWrong.png"), "WRONG", JOptionPane.INFORMATION_MESSAGE);
+
+		}
+		win();
+	}
+
+	public void actionPerformed (ActionEvent e) //action performed
+	{
+		if (e.getActionCommand ().equals ("next"))
+			cdLayout.show(p_card, "2");
+		else if(e.getActionCommand ().equals ("play")) {
+			cdLayout.show(p_card, "3");
+			reveal.setEnabled(false);
+		}
+		else if (e.getActionCommand ().equals ("creator"))
+			JOptionPane.showMessageDialog (null, createImageIcon ("creator.png"), "Creator", JOptionPane.INFORMATION_MESSAGE);
+		else if (e.getActionCommand ().equals ("how"))
+			JOptionPane.showMessageDialog (null, createImageIcon ("instructions.png"), "Instructions", JOptionPane.INFORMATION_MESSAGE);
+		else if (e.getActionCommand ().equals ("back"))
+			cdLayout.show(p_card, "1");
+		else if (e.getActionCommand ().equals("exit"))
+			System.exit(0);
+		else if (e.getActionCommand ().equals ("gback"))
+			cdLayout.show(p_card, "2");
+		else if (e.getActionCommand ().equals ("reset")) {
+			reset();
+		}
+		else if (e.getActionCommand ().equals ("invinRoll")) {
+			adv.setEnabled (true);
+			choice.setEnabled(true);
+			int invincibleAnswer = (int) (Math.random() * 3); //randomly pick 0, 1, or 2
+			if (invincibleAnswer == current.getAnswer()) {
+				cpuScore++;
+				JOptionPane.showMessageDialog (null, createImageIcon ("invinRight.png"), "CORRECT", JOptionPane.INFORMATION_MESSAGE);
+				invinGrid[cpuScore-1].setIcon(createImageIcon("invinPoint.png"));
+			}
+			else 
+			{
+				JOptionPane.showMessageDialog (null, createImageIcon ("invinWrong.png"), "WRONG", JOptionPane.INFORMATION_MESSAGE);
+			}
+			win();
+		}
+
+		else if (e.getActionCommand ().equals ("choice"))
+		{
+			choice.setEnabled(false);
+			reveal.setEnabled(true);
+			choice();											//call the choice method to handle answer choice
+		}
+		else if (e.getActionCommand ().equals ("adv"))
+		{			
+			adv.setEnabled (false);
+			ans.setText ("                                                   "
+					+ "ANSWER WILL BE DISPLAYED HERE");
+			if (!questionsStack.isEmpty ()) {
+				current = questionsStack.pop ();
+				question.setText (current.getQuestion());										
+			}
+		} //end adv
+
+		else if (e.getActionCommand ().equals ("reveal"))
+		{
+
+			if (current != null) {
+				ans.setText("Answer: " + current.getAnswer());		//show the answer
+				ans.setText(current.getExplanation()); 				//show the explanation
+
+			} else {
+				ans.setText("No question available");				//for the case where there's no current question
+
+			}
+		} //end reveal
+
+	} //end AP
+
+
+
+
+
+
+
+
+	protected static ImageIcon createImageIcon (String path)
+	{
+		java.net.URL imgURL = BoxOfRocks.class.getResource (path);
+		if (imgURL != null)
+			return new ImageIcon (imgURL);
+		else
+			return null;
+	}
+	public static void main (String[] args)
+	{
+		JFrame.setDefaultLookAndFeelDecorated (true);
+		//Create and set up the window.
+		JFrame frame = new JFrame ("BoxOfRocks");
+		frame.setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
+		//Create and set up the content pane.
+		JComponent newContentPane = new BoxOfRocks ();
+		newContentPane.setOpaque (true);
+		frame.setContentPane (newContentPane);
+		frame.setSize (750, 442);
+		frame.setVisible (true);
+
+	}
+}
