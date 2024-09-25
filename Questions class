@@ -1,0 +1,80 @@
+package Sound;
+
+
+public class Questions 
+{
+
+	private String question;
+	private String reason;
+	private int answer;
+
+	public Questions ()
+	{
+		question = "How many US states still do not have a walmart?";
+		reason = "Hawaii is the only state to not have a walmart";
+		answer = 0;
+	}
+
+	public Questions (String q, String r, int a)
+	{
+		question = q;
+		reason = r;
+		answer = a;
+	}
+
+	public void setQuestions (String q)
+	{
+		question = q;
+	}
+
+	public void setReason (String r)
+	{
+		reason = r;
+	}
+
+	public void setAnswer(int a )
+	{
+		answer = a;
+	}
+
+	public String getQuestion ()
+	{
+		return question;
+	}
+
+    public String getExplanation() {
+        return reason;
+    }
+
+	public int setAnswer ()
+	{
+		return answer;
+	}
+
+	public int getAnswer () {
+		return answer;
+	}
+	
+	public String getReason () {
+		return reason;
+	}
+
+	public boolean equals (Questions q)
+	{
+		if (answer == q.getAnswer())
+			return true;
+		else
+			return false;
+	}
+
+	public int compareTo (Questions q)
+	{
+		if (answer > q.getAnswer())
+			return 1;
+		else if (answer < q.getAnswer()	)
+			return -1;
+		else
+			return 0;
+	}
+	
+} //end class
